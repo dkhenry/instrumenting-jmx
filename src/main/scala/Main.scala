@@ -44,7 +44,7 @@ object Main extends App {
 	   println { "Starting JMX Monitoring Tool" } 
 	   val addr = InetAddress.getLocalHost().getHostAddress()
 	   println { "Enabling JMX on " + addr }
-	   System.setProperty("java.rmi.server.hostname", "10.2.18.48")
+	   System.setProperty("java.rmi.server.hostname", "10.2.18.50")
 	   val mbs = enableJmx(addr,7009)
 	   
 	   var data = new BasicData { 
