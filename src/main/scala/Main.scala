@@ -28,7 +28,7 @@ object Main extends App {
 			MBeanServerFactory.createMBeanServer();
 		  }
 		  case m: MBeanServer => m
-		}
+		}			
 		
 		println { "Platform MBean Server Created: " + mbs }
 		println { "JMX enabled on " + "service:jmx:rmi:///jndi/rmi://" + address + ":" + port + "/jmxrmi" }
@@ -44,6 +44,7 @@ object Main extends App {
 	   println { "Starting JMX Monitoring Tool" } 
 	   val addr = InetAddress.getLocalHost().getHostAddress()
 	   println { "Enabling JMX on " + addr }
+	   System.setProperty("java.rmi.server.hostname", "10.2.18.48")
 	   val mbs = enableJmx(addr,7009)
 	   
 	   var data = new BasicData { 
