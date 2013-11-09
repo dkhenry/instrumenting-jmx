@@ -11,10 +11,13 @@ import javax.management.MBeanServer
 import javax.management.remote.JMXServiceURL
 import javax.management.remote.JMXConnectorServerFactory
 import scala.collection.immutable.HashMap
+import javax.management.MBeanOperationInfo
+import javax.management.openmbean.OpenMBeanParameterInfo
 
 object Main extends App { 
 	var reg: Registry = null //! The registery hold the open port. This _must_ remain in scope for the program to work 
-	
+	var stop: Boolean = false;
+	var counter: Long = 0;
 	/**
 	 * This function wraps enabling the JMX system programatically 
 	 */
@@ -46,7 +49,19 @@ object Main extends App {
 	   var data = new BasicData { 
 			val attributes = List[(String,String,OpenType[_ <: AnyRef], () => AnyRef)] (
 					("epoch","This is the current epoch in seconds",SimpleType.LONG,{ () =>
-                                        Long.box(System.currentTimeMillis() / 1000) })
+                                        Long.box(System.currentTimeMillis() / 1000) }),
+                    ("counter","This is the current value of the counter",SimpleType.LONG,{ () =>
+                                        Long.box(counter) })                    
+            )
+            val functions: List[(String,String,Array[OpenMBeanParameterInfo],OpenType[_ <: AnyRef], Int, () => AnyRef)] = List(
+            		("terminate","Calling this function will terminate the daemon",Array(),SimpleType.VOID,MBeanOperationInfo.ACTION,{ () =>
+            			stop = true
+            			null
+            		}),
+            		("increment","Increment the counter",Array(),SimpleType.VOID,MBeanOperationInfo.ACTION,{ () =>
+            			counter = counter + 1 
+            			null
+            		})
             )
             val dataName = "ExampleJMXMBean"
 			override def typ = "ExampleJMXMBean"
@@ -54,7 +69,7 @@ object Main extends App {
 	   
 	   data.register(mbs)
 	   
-	   while ( 1 == 1 ) { 
+	   while ( ! stop ) { 
 	   		Thread.sleep(1000)
 		}
 }

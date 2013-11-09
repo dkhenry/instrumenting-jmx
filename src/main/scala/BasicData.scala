@@ -16,7 +16,8 @@ import java.rmi.registry.Registry
  * If you provide a list of attributes it will construct the mbean for you
  */ 
 abstract trait BasicData extends DynamicMBean {
-	val attributes: List[(String,String,OpenType[_ <: AnyRef], () => AnyRef)]		
+	val attributes: List[(String,String,OpenType[_ <: AnyRef], () => AnyRef)]	
+	val functions : List[(String,String,Array[OpenMBeanParameterInfo],OpenType[_ <: AnyRef], Int, () => AnyRef)]
 	val dataName: String 
 	def typ: String
 	def name: String = dataName
@@ -37,13 +38,19 @@ abstract trait BasicData extends DynamicMBean {
 	}
 
 	override def getMBeanInfo(): MBeanInfo =  { 
-			var arr :Array[OpenMBeanAttributeInfo] = new Array[OpenMBeanAttributeInfo](5)
-					val a = attributes.map { x=> new OpenMBeanAttributeInfoSupport(x._1, x._2, x._3, true, false, false) } 
-	new OpenMBeanInfoSupport(this.getClass.getName,dataName , a.toArray , null, null, null)
+			var arr :Array[OpenMBeanAttributeInfo] = new Array[OpenMBeanAttributeInfo](attributes.length)
+			val a = attributes.map { x=> new OpenMBeanAttributeInfoSupport(x._1, x._2, x._3, true, false, false) }
+			val f = functions.map { x=> new OpenMBeanOperationInfoSupport(x._1,x._2,x._3,x._4,x._5)}
+			new OpenMBeanInfoSupport(this.getClass.getName,dataName , a.toArray , null, f.toArray, null)
 	}
 
 	override def invoke(arg0: String, arg1: Array[Object], arg2: Array[String]): Object = {
-			throw new ReflectionException(new NoSuchMethodException(arg0),"Cannot find the operation " + arg0) ;  
+		println {"Invoking " + arg0 }
+		functions.filter( _._1 == arg0) match {
+			case x :: xs => x._6()
+			case _ => throw new ReflectionException(new NoSuchMethodException(arg0),"Cannot find the operation " + arg0) ;				
+		}
+		  
 	}
 
 	override def setAttribute(arg0: Attribute): Unit = { 
