@@ -1,0 +1,17 @@
+logs
+project/project
+project/target
+target
+tmp
+.history
+dist
+.ensime_lucene
+\#*
+.\#*
+config.xml
+.idea
+.idea_modules
+.classpath
+.project
+.settings
+*~
